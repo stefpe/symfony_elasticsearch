@@ -107,7 +107,10 @@ class FeedProductsCommand extends Command
      */
     private function createIndex(): void
     {
-        $this->client->indices()->delete($this->indexDefinition);
+        if ($this->client->indices()->exists($this->indexDefinition)){
+            $this->client->indices()->delete($this->indexDefinition);
+        }
+
         $this->client->indices()->create(
             array_merge(
                 $this->indexDefinition,
@@ -121,9 +124,6 @@ class FeedProductsCommand extends Command
                                     "autocomplete" => [
                                         "tokenizer" => "autocomplete",
                                         "filter" => ["lowercase"]
-                                    ],
-                                    "autocomplete_search" => [
-                                        "tokenizer" => "lowercase"
                                     ]
                                 ],
                                 "tokenizer" => [
@@ -132,7 +132,8 @@ class FeedProductsCommand extends Command
                                         "min_gram" => 2,
                                         "max_gram" => 20,
                                         "token_chars" => [
-                                            "letter"
+                                            "letter",
+                                            "digit"
                                         ]
                                     ]
                                 ]
@@ -143,7 +144,7 @@ class FeedProductsCommand extends Command
                                 "title" => [
                                     "type" => "text",
                                     "analyzer" => "autocomplete",
-                                    "search_analyzer" => "autocomplete_search"
+                                    "search_analyzer" => "standard"
                                 ]
                             ]
                         ]
